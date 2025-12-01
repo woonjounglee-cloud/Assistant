@@ -262,6 +262,59 @@
             vertical-align: middle;
             line-height: 1;
         }
+
+        /* 버튼 스타일 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-export {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #5568d3;
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .btn-delete:hover {
+            transform: scale(1.2);
+        }
+
+        .add-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .add-form input[type="text"],
+        .add-form input[type="number"] {
+            width: 120px;
+        }
     </style>
 </head>
 <body>
@@ -272,7 +325,7 @@
 
         <div class="tabs">
             <button class="tab active" onclick="switchTab('otCalculator')">💰 OT 수당 계산기</button>
-            <button class="tab" onclick="switchTab('ssgg')">🎯 SSGG</button>
+            <button class="tab" onclick="switchTab('ssgg')">⛳ SSGG</button>
         </div>
 
         <!-- OT 수당 계산기 탭 -->
@@ -337,10 +390,60 @@
 
         <!-- SSGG 탭 -->
         <div id="ssggTab" class="tab-content">
-            <div class="section-title">🎯 SSGG</div>
-            <div class="info-box">
-                <strong>📌 준비 중입니다</strong><br>
-                SSGG 기능이 곧 추가될 예정입니다.
+            <div class="section-title">⛳ SSGG - 골프 티밍 구성</div>
+
+            <div style="margin-bottom: 20px; text-align: right;">
+                <button class="btn btn-success" onclick="makeTeams()">🎯 티밍 짜기</button>
+                <button class="btn btn-export" onclick="saveMemberData()">💾 저장</button>
+            </div>
+
+            <div class="table-container" style="max-height: 600px;">
+                <table id="memberTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">닉네임</th>
+                            <th style="width: 80px;">이름</th>
+                            <th style="width: 50px;">3월</th>
+                            <th style="width: 50px;">4월</th>
+                            <th style="width: 50px;">5월</th>
+                            <th style="width: 50px;">6월</th>
+                            <th style="width: 50px;">7월</th>
+                            <th style="width: 50px;">8월</th>
+                            <th style="width: 50px;">9월</th>
+                            <th style="width: 50px;">10월</th>
+                            <th style="width: 60px;">평균</th>
+                            <th style="width: 60px;">정모참여</th>
+                            <th style="width: 60px;">삭제</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberTableBody">
+                        <!-- 멤버 데이터가 여기에 동적으로 추가됩니다 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="add-form" style="margin-top: 30px;">
+                <div class="section-title">➕ 새 멤버 추가</div>
+                <div class="form-row" style="justify-content: flex-start;">
+                    <div class="form-group">
+                        <label class="form-label">닉네임 *</label>
+                        <input type="text" id="newNickname" placeholder="닉네임">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">이름 *</label>
+                        <input type="text" id="newName" placeholder="이름">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">기본 타수</label>
+                        <input type="number" id="newScore" placeholder="타수" min="0" style="width: 80px;">
+                    </div>
+                    <button class="btn btn-success" onclick="addMember()" style="align-self: flex-end;">추가</button>
+                </div>
+            </div>
+
+            <div id="teamResult" style="display: none; margin-top: 30px;">
+                <div class="section-title">🏆 티밍 결과</div>
+                <div id="teamResultContent"></div>
             </div>
         </div>
     </div>
@@ -417,6 +520,270 @@
                 currency: 'KRW'
             }).format(Math.round(amount));
         }
+
+        // ========== SSGG 골프 티밍 기능 ==========
+
+        // 초기 멤버 데이터
+        const initialMembers = [
+            { nickname: '네일은', name: '김미영(A)', scores: [94, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '보너디', name: '이소연', scores: [100, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '라벨가조아', name: '신수진', scores: [90, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '마리짱', name: '이지영', scores: [90, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '땅땅왕', name: '강진혜', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '비비', name: '하나티', scores: [102, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '세이쿠', name: '최선미', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '언젠간잘할', name: '구현영', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '연례행사터', name: '김미영(B)', scores: [103, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '운지리', name: '이문정', scores: [103, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '정', name: '신애정', scores: [86, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '제이', name: '고윤희', scores: [98, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '제제', name: '최지혜', scores: [108, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '케이티', name: '조정희', scores: [120, 0, 0, 0, 0, 0, 0, 0], attend: false },
+            { nickname: '퍼시픽', name: '문선희', scores: [94, 0, 0, 0, 0, 0, 0, 0], attend: false }
+        ];
+
+        // 멤버 데이터 로드
+        function loadMembers() {
+            const saved = localStorage.getItem('ssggMembers');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            // 초기 데이터 저장
+            localStorage.setItem('ssggMembers', JSON.stringify(initialMembers));
+            return initialMembers;
+        }
+
+        // 멤버 데이터 저장
+        function saveMemberData() {
+            const members = [];
+            const rows = document.querySelectorAll('#memberTableBody tr');
+
+            rows.forEach(row => {
+                const nickname = row.cells[0].textContent;
+                const name = row.cells[1].textContent;
+                const scores = [];
+
+                // 3월~10월 타수 (8개월)
+                for (let i = 2; i < 10; i++) {
+                    const input = row.cells[i].querySelector('input');
+                    scores.push(parseInt(input.value) || 0);
+                }
+
+                const attend = row.cells[11].querySelector('input').checked;
+
+                members.push({ nickname, name, scores, attend });
+            });
+
+            localStorage.setItem('ssggMembers', JSON.stringify(members));
+            alert('저장되었습니다!');
+        }
+
+        // 평균 계산
+        function calculateAverage(scores) {
+            const validScores = scores.filter(s => s > 0);
+            if (validScores.length === 0) return 0;
+            const sum = validScores.reduce((a, b) => a + b, 0);
+            return (sum / validScores.length).toFixed(1);
+        }
+
+        // 멤버 테이블 렌더링
+        function renderMemberTable() {
+            const members = loadMembers();
+            const tbody = document.getElementById('memberTableBody');
+            tbody.innerHTML = '';
+
+            members.forEach((member, index) => {
+                const row = tbody.insertRow();
+
+                // 닉네임
+                const nicknameCell = row.insertCell();
+                nicknameCell.textContent = member.nickname;
+
+                // 이름
+                const nameCell = row.insertCell();
+                nameCell.textContent = member.name;
+
+                // 3월~10월 타수 입력 (8개월)
+                for (let i = 0; i < 8; i++) {
+                    const scoreCell = row.insertCell();
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.value = member.scores[i] || '';
+                    input.min = '0';
+                    input.style.width = '45px';
+                    input.style.padding = '4px';
+                    input.style.textAlign = 'center';
+                    input.oninput = () => updateAverage(row);
+                    scoreCell.appendChild(input);
+                }
+
+                // 평균
+                const avgCell = row.insertCell();
+                avgCell.style.fontWeight = 'bold';
+                avgCell.style.background = '#f0f4ff';
+                avgCell.textContent = calculateAverage(member.scores);
+
+                // 정모참여
+                const attendCell = row.insertCell();
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = member.attend;
+                checkbox.style.cursor = 'pointer';
+                attendCell.appendChild(checkbox);
+
+                // 삭제
+                const deleteCell = row.insertCell();
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-delete';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.onclick = () => deleteMember(index);
+                deleteCell.appendChild(deleteBtn);
+            });
+        }
+
+        // 평균 업데이트
+        function updateAverage(row) {
+            const scores = [];
+            for (let i = 2; i < 10; i++) {
+                const input = row.cells[i].querySelector('input');
+                const score = parseInt(input.value) || 0;
+                scores.push(score);
+            }
+            row.cells[10].textContent = calculateAverage(scores);
+        }
+
+        // 새 멤버 추가
+        function addMember() {
+            const nickname = document.getElementById('newNickname').value.trim();
+            const name = document.getElementById('newName').value.trim();
+            const score = parseInt(document.getElementById('newScore').value) || 0;
+
+            if (!nickname || !name) {
+                alert('닉네임과 이름을 입력해주세요.');
+                return;
+            }
+
+            const members = loadMembers();
+            members.push({
+                nickname,
+                name,
+                scores: [score, 0, 0, 0, 0, 0, 0, 0],
+                attend: false
+            });
+
+            localStorage.setItem('ssggMembers', JSON.stringify(members));
+
+            // 입력 필드 초기화
+            document.getElementById('newNickname').value = '';
+            document.getElementById('newName').value = '';
+            document.getElementById('newScore').value = '';
+
+            renderMemberTable();
+        }
+
+        // 멤버 삭제
+        function deleteMember(index) {
+            if (!confirm('정말 삭제하시겠습니까?')) return;
+
+            const members = loadMembers();
+            members.splice(index, 1);
+            localStorage.setItem('ssggMembers', JSON.stringify(members));
+            renderMemberTable();
+        }
+
+        // 티밍 짜기
+        function makeTeams() {
+            // 먼저 데이터 저장
+            saveMemberData();
+
+            const members = loadMembers();
+
+            // 정모 참여자만 필터링
+            const participants = members.filter(m => m.attend);
+
+            if (participants.length < 4) {
+                alert('정모 참여자가 4명 이상이어야 합니다.');
+                return;
+            }
+
+            // 평균 타수 계산하여 정렬
+            const sorted = participants.map(m => ({
+                ...m,
+                avg: parseFloat(calculateAverage(m.scores))
+            })).sort((a, b) => a.avg - b.avg);
+
+            // 4명씩 팀 구성 (뱀 방식)
+            const teamCount = Math.floor(sorted.length / 4);
+            const teams = Array.from({ length: teamCount }, () => []);
+
+            let teamIndex = 0;
+            let direction = 1;
+
+            for (let i = 0; i < teamCount * 4; i++) {
+                teams[teamIndex].push(sorted[i]);
+
+                teamIndex += direction;
+
+                if (teamIndex === teamCount || teamIndex === -1) {
+                    direction *= -1;
+                    teamIndex += direction;
+                }
+            }
+
+            // 결과 표시
+            displayTeamResult(teams);
+        }
+
+        // 티밍 결과 표시
+        function displayTeamResult(teams) {
+            const resultDiv = document.getElementById('teamResultContent');
+
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+
+            teams.forEach((team, index) => {
+                const teamAvg = (team.reduce((sum, m) => sum + m.avg, 0) / team.length).toFixed(1);
+
+                html += `
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 2px solid #667eea;">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">팀 ${index + 1} (평균: ${teamAvg})</h3>
+                        <table style="width: 100%; font-size: 13px;">
+                            <thead>
+                                <tr style="background: #667eea; color: white;">
+                                    <th style="padding: 8px;">닉네임</th>
+                                    <th style="padding: 8px;">이름</th>
+                                    <th style="padding: 8px;">평균</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                team.forEach(member => {
+                    html += `
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; text-align: center;">${member.nickname}</td>
+                            <td style="padding: 8px; text-align: center;">${member.name}</td>
+                            <td style="padding: 8px; text-align: center; font-weight: bold;">${member.avg}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+
+            resultDiv.innerHTML = html;
+            document.getElementById('teamResult').style.display = 'block';
+        }
+
+        // 페이지 로드시 멤버 테이블 렌더링
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMemberTable();
+        });
     </script>
 </body>
 </html>
