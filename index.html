@@ -94,9 +94,24 @@
 
         .form-row .checkbox-group {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 8px;
             margin-bottom: 0;
+        }
+
+        .form-row .checkbox-group .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row .checkbox-group .checkbox-label-top {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+            height: 22px;
         }
 
         .table-container {
@@ -279,8 +294,11 @@
                            oninput="calculateOT()" min="0" step="0.5">
                 </div>
                 <div class="checkbox-group">
-                    <input type="checkbox" id="useDDay" onchange="calculateOT()">
-                    <label for="useDDay">D-Day 사용</label>
+                    <span class="checkbox-label-top">옵션</span>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="useDDay" onchange="calculateOT()">
+                        <label for="useDDay">D-Day 사용</label>
+                    </div>
                 </div>
             </div>
 
@@ -306,7 +324,7 @@
                         </tr>
                         <tr style="background: #f0f4ff;">
                             <td colspan="3" style="text-align: center;">
-                                <strong>총 OT 시간: <span id="totalOtHours">0</span>시간</strong>
+                                <strong style="font-size: 20px;">총 OT 시간: <span id="totalOtHours">0</span>시간</strong>
                                 <span id="heartDisplay" style="margin-left: 20px; font-size: 24px;"></span>
                             </td>
                         </tr>
