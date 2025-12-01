@@ -85,10 +85,22 @@
         }
 
         .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
+            align-items: flex-end;
             gap: 15px;
             margin-bottom: 20px;
+        }
+
+        .form-row .form-group {
+            width: 30%;
+            margin-bottom: 0;
+        }
+
+        .form-row .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0;
         }
 
         .table-container {
@@ -163,21 +175,6 @@
             color: #667eea;
         }
 
-        .dday-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 8px;
-            margin-top: 30px;
-            border: 2px solid #e0e0e0;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
         .checkbox-group input[type="checkbox"] {
             width: 20px;
             height: 20px;
@@ -185,38 +182,10 @@
         }
 
         .checkbox-group label {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-        }
-
-        .dday-calculator {
-            display: none;
-        }
-
-        .dday-calculator.active {
-            display: block;
-        }
-
-        .dday-result {
-            margin-top: 15px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            border: 2px solid #667eea;
-            text-align: center;
-        }
-
-        .dday-result h3 {
-            color: #667eea;
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        .dday-number {
-            font-size: 48px;
-            font-weight: bold;
-            color: #667eea;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -224,7 +193,7 @@
     <div class="container">
         <div class="header">
             <h1>🤖 Assistant</h1>
-            <p>OT 수당 계산 및 D-Day 계산기</p>
+            <p>OT 수당 계산기</p>
         </div>
 
         <div class="content">
@@ -241,6 +210,10 @@
                     <label class="form-label">추가 OT 시간</label>
                     <input type="number" id="additionalOtHours" placeholder="추가 OT 시간 입력"
                            oninput="calculateOT()" min="0" step="0.5">
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="useDDay" onchange="calculateOT()">
+                    <label for="useDDay">D-Day 사용</label>
                 </div>
             </div>
 
@@ -276,29 +249,10 @@
 
             <div class="info-box">
                 <strong>📌 계산 공식</strong><br>
-                • 세전수당 = (OT 시간 - 14) × 25,000 × 1.5<br>
-                • 총 입금(세후) = 세전수당 × 0.76 (24% 세금 공제)<br>
+                • 세전수당 = (OT 시간 - 14) × 30,796 × 1.5<br>
+                • 총 입금(세후) = 세전수당 × (1 - 0.24 × 0.8) = 세전수당 × 0.808<br>
+                • D-Day 사용: 체크하면 총 OT 시간에서 8시간을 차감하여 계산<br>
                 • 하트 표시: ≤26시간 ❤️ | 27~38시간 ❤️❤️ | >38시간 ❤️❤️❤️
-            </div>
-
-            <!-- D-Day 계산기 -->
-            <div class="dday-section">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="useDDay" onchange="toggleDDay()">
-                    <label for="useDDay">D-Day 날짜 계산하기</label>
-                </div>
-
-                <div id="ddayCalculator" class="dday-calculator">
-                    <div class="form-group">
-                        <label class="form-label">목표 날짜</label>
-                        <input type="date" id="targetDate" onchange="calculateDDay()">
-                    </div>
-
-                    <div id="ddayResult" class="dday-result" style="display: none;">
-                        <h3>남은 시간</h3>
-                        <div class="dday-number" id="ddayNumber">D-0</div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -309,17 +263,22 @@
             // 입력값 가져오기
             const otHours = parseFloat(document.getElementById('otHours').value) || 0;
             const additionalOtHours = parseFloat(document.getElementById('additionalOtHours').value) || 0;
+            const useDDay = document.getElementById('useDDay').checked;
 
             // 총 OT 시간 계산
-            const totalHours = otHours + additionalOtHours;
+            let totalHours = otHours + additionalOtHours;
+
+            // D-Day 사용 체크시 8시간 차감
+            const calculationHours = useDDay ? totalHours - 8 : totalHours;
 
             // 기본 OT 계산 (OT 시간만)
-            const basicPreTax = (otHours - 14) * 25000 * 1.5;
-            const basicAfterTax = basicPreTax * 0.76;
+            const basicCalculationHours = useDDay ? otHours - 8 : otHours;
+            const basicPreTax = (basicCalculationHours - 14) * 30796 * 1.5;
+            const basicAfterTax = basicPreTax * 0.808;
 
             // 추가 OT 포함 계산 (OT 시간 + 추가 OT 시간)
-            const totalPreTax = (totalHours - 14) * 25000 * 1.5;
-            const totalAfterTax = totalPreTax * 0.76;
+            const totalPreTax = (calculationHours - 14) * 30796 * 1.5;
+            const totalAfterTax = totalPreTax * 0.808;
 
             // 결과 표시
             document.getElementById('basicPreTax').textContent =
@@ -353,53 +312,6 @@
                 style: 'currency',
                 currency: 'KRW'
             }).format(Math.round(amount));
-        }
-
-        // D-Day 계산기 토글
-        function toggleDDay() {
-            const checkbox = document.getElementById('useDDay');
-            const calculator = document.getElementById('ddayCalculator');
-
-            if (checkbox.checked) {
-                calculator.classList.add('active');
-            } else {
-                calculator.classList.remove('active');
-            }
-        }
-
-        // D-Day 계산
-        function calculateDDay() {
-            const targetDate = document.getElementById('targetDate').value;
-
-            if (!targetDate) {
-                document.getElementById('ddayResult').style.display = 'none';
-                return;
-            }
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            const target = new Date(targetDate);
-            target.setHours(0, 0, 0, 0);
-
-            const diffTime = target - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-            const ddayNumber = document.getElementById('ddayNumber');
-            const ddayResult = document.getElementById('ddayResult');
-
-            if (diffDays > 0) {
-                ddayNumber.textContent = `D-${diffDays}`;
-                ddayNumber.style.color = '#667eea';
-            } else if (diffDays === 0) {
-                ddayNumber.textContent = 'D-Day';
-                ddayNumber.style.color = '#28a745';
-            } else {
-                ddayNumber.textContent = `D+${Math.abs(diffDays)}`;
-                ddayNumber.style.color = '#dc3545';
-            }
-
-            ddayResult.style.display = 'block';
         }
     </script>
 </body>
