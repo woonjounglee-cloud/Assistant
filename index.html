@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant - OT 수당 계산기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 600;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .table-container {
+            max-height: 500px;
+            overflow: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            background: #667eea;
+            z-index: 10;
+        }
+
+        thead th {
+            padding: 12px 8px;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        thead th:last-child {
+            border-right: none;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: #f0f0f0;
+        }
+
+        tbody td {
+            padding: 10px 8px;
+            border-right: 1px solid #eee;
+            text-align: center;
+        }
+
+        tbody td:last-child {
+            border-right: none;
+        }
+
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #667eea;
+        }
+
+        .dday-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .dday-calculator {
+            display: none;
+        }
+
+        .dday-calculator.active {
+            display: block;
+        }
+
+        .dday-result {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+            text-align: center;
+        }
+
+        .dday-result h3 {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .dday-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Assistant</h1>
+            <p>OT 수당 계산 및 D-Day 계산기</p>
+        </div>
+
+        <div class="content">
+            <!-- OT 수당 계산기 -->
+            <div class="section-title">💰 OT 수당 계산기</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">OT 시간</label>
+                    <input type="number" id="otHours" placeholder="OT 시간 입력"
+                           oninput="calculateOT()" min="0" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">추가 OT 시간</label>
+                    <input type="number" id="additionalOtHours" placeholder="추가 OT 시간 입력"
+                           oninput="calculateOT()" min="0" step="0.5">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>구분</th>
+                            <th>세전수당</th>
+                            <th>총 입금(세후)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>기본 OT</strong></td>
+                            <td id="basicPreTax">-</td>
+                            <td id="basicAfterTax">-</td>
+                        </tr>
+                        <tr>
+                            <td><strong>추가 OT 포함</strong></td>
+                            <td id="totalPreTax">-</td>
+                            <td id="totalAfterTax">-</td>
+                        </tr>
+                        <tr style="background: #f0f4ff;">
+                            <td colspan="3" style="text-align: center;">
+                                <strong>총 OT 시간: <span id="totalOtHours">0</span>시간</strong>
+                                <span id="heartDisplay" style="margin-left: 20px; font-size: 24px;"></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="info-box">
+                <strong>📌 계산 공식</strong><br>
+                • 세전수당 = (OT 시간 - 14) × 25,000 × 1.5<br>
+                • 총 입금(세후) = 세전수당 × 0.76 (24% 세금 공제)<br>
+                • 하트 표시: ≤26시간 ❤️ | 27~38시간 ❤️❤️ | >38시간 ❤️❤️❤️
+            </div>
+
+            <!-- D-Day 계산기 -->
+            <div class="dday-section">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="useDDay" onchange="toggleDDay()">
+                    <label for="useDDay">D-Day 날짜 계산하기</label>
+                </div>
+
+                <div id="ddayCalculator" class="dday-calculator">
+                    <div class="form-group">
+                        <label class="form-label">목표 날짜</label>
+                        <input type="date" id="targetDate" onchange="calculateDDay()">
+                    </div>
+
+                    <div id="ddayResult" class="dday-result" style="display: none;">
+                        <h3>남은 시간</h3>
+                        <div class="dday-number" id="ddayNumber">D-0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // OT 수당 계산 함수
+        function calculateOT() {
+            // 입력값 가져오기
+            const otHours = parseFloat(document.getElementById('otHours').value) || 0;
+            const additionalOtHours = parseFloat(document.getElementById('additionalOtHours').value) || 0;
+
+            // 총 OT 시간 계산
+            const totalHours = otHours + additionalOtHours;
+
+            // 기본 OT 계산 (OT 시간만)
+            const basicPreTax = (otHours - 14) * 25000 * 1.5;
+            const basicAfterTax = basicPreTax * 0.76;
+
+            // 추가 OT 포함 계산 (OT 시간 + 추가 OT 시간)
+            const totalPreTax = (totalHours - 14) * 25000 * 1.5;
+            const totalAfterTax = totalPreTax * 0.76;
+
+            // 결과 표시
+            document.getElementById('basicPreTax').textContent =
+                basicPreTax >= 0 ? formatCurrency(basicPreTax) : '-';
+            document.getElementById('basicAfterTax').textContent =
+                basicAfterTax >= 0 ? formatCurrency(basicAfterTax) : '-';
+
+            document.getElementById('totalPreTax').textContent =
+                totalPreTax >= 0 ? formatCurrency(totalPreTax) : '-';
+            document.getElementById('totalAfterTax').textContent =
+                totalAfterTax >= 0 ? formatCurrency(totalAfterTax) : '-';
+
+            // 총 OT 시간 표시
+            document.getElementById('totalOtHours').textContent = totalHours.toFixed(1);
+
+            // 하트 표시
+            let hearts = '';
+            if (totalHours <= 26) {
+                hearts = '❤️';
+            } else if (totalHours <= 38) {
+                hearts = '❤️❤️';
+            } else {
+                hearts = '❤️❤️❤️';
+            }
+            document.getElementById('heartDisplay').textContent = hearts;
+        }
+
+        // 통화 형식 변환 함수
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ko-KR', {
+                style: 'currency',
+                currency: 'KRW'
+            }).format(Math.round(amount));
+        }
+
+        // D-Day 계산기 토글
+        function toggleDDay() {
+            const checkbox = document.getElementById('useDDay');
+            const calculator = document.getElementById('ddayCalculator');
+
+            if (checkbox.checked) {
+                calculator.classList.add('active');
+            } else {
+                calculator.classList.remove('active');
+            }
+        }
+
+        // D-Day 계산
+        function calculateDDay() {
+            const targetDate = document.getElementById('targetDate').value;
+
+            if (!targetDate) {
+                document.getElementById('ddayResult').style.display = 'none';
+                return;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const target = new Date(targetDate);
+            target.setHours(0, 0, 0, 0);
+
+            const diffTime = target - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const ddayNumber = document.getElementById('ddayNumber');
+            const ddayResult = document.getElementById('ddayResult');
+
+            if (diffDays > 0) {
+                ddayNumber.textContent = `D-${diffDays}`;
+                ddayNumber.style.color = '#667eea';
+            } else if (diffDays === 0) {
+                ddayNumber.textContent = 'D-Day';
+                ddayNumber.style.color = '#28a745';
+            } else {
+                ddayNumber.textContent = `D+${Math.abs(diffDays)}`;
+                ddayNumber.style.color = '#dc3545';
+            }
+
+            ddayResult.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
