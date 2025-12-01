@@ -395,8 +395,8 @@
             document.getElementById('totalAfterTax').textContent =
                 totalAfterTax >= 0 ? formatCurrency(totalAfterTax) : '-';
 
-            // 총 OT 시간 표시
-            document.getElementById('totalOtHours').textContent = totalHours.toFixed(1);
+            // 총 OT 시간 표시 (D-Day 사용 시 -8시간 반영)
+            document.getElementById('totalOtHours').textContent = calculationHours.toFixed(1);
 
             // 하트 표시
             let hearts = '';
