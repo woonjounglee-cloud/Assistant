@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assistant - OT 수당 계산기</title>
+    <!-- SheetJS 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -443,7 +445,10 @@
             </div>
 
             <div id="teamResult" style="display: none; margin-top: 30px;">
-                <div class="section-title">🏆 티밍 결과</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div class="section-title" style="margin-bottom: 0;">🏆 티밍 결과</div>
+                    <button class="btn btn-export" onclick="downloadTeamsAsExcel()">📥 엑셀 다운로드</button>
+                </div>
                 <div id="teamResultContent"></div>
             </div>
         </div>
@@ -523,6 +528,9 @@
         }
 
         // ========== SSGG 골프 티밍 기능 ==========
+
+        // 티밍 결과 저장용 전역 변수
+        let currentTeams = [];
 
         // 초기 멤버 데이터
         const initialMembers = [
@@ -747,6 +755,9 @@
             // 김미영(A)와 김미영(B)가 같은 팀에 있는지 확인하고 조정
             adjustTeamsForSameNameMembers(teams);
 
+            // 결과 저장
+            currentTeams = teams;
+
             // 결과 표시
             displayTeamResult(teams);
         }
@@ -844,6 +855,59 @@
 
             resultDiv.innerHTML = html;
             document.getElementById('teamResult').style.display = 'block';
+        }
+
+        // 티밍 결과를 엑셀 파일로 다운로드
+        function downloadTeamsAsExcel() {
+            if (currentTeams.length === 0) {
+                alert('다운로드할 티밍 결과가 없습니다.');
+                return;
+            }
+
+            // 워크북 생성
+            const wb = XLSX.utils.book_new();
+
+            // 각 팀별로 시트 데이터 생성
+            const allTeamsData = [];
+
+            currentTeams.forEach((team, index) => {
+                const teamAvg = (team.reduce((sum, m) => sum + m.avg, 0) / team.length).toFixed(1);
+
+                // 팀 제목 추가
+                allTeamsData.push([`팀 ${index + 1} (평균: ${teamAvg})`]);
+
+                // 헤더 추가
+                allTeamsData.push(['닉네임', '이름', '평균 타수']);
+
+                // 팀원 데이터 추가
+                team.forEach(member => {
+                    allTeamsData.push([member.nickname, member.name, member.avg]);
+                });
+
+                // 팀 사이 빈 줄 추가
+                allTeamsData.push([]);
+            });
+
+            // 워크시트 생성
+            const ws = XLSX.utils.aoa_to_sheet(allTeamsData);
+
+            // 열 너비 설정
+            ws['!cols'] = [
+                { wch: 20 }, // 닉네임
+                { wch: 15 }, // 이름
+                { wch: 12 }  // 평균 타수
+            ];
+
+            // 워크북에 워크시트 추가
+            XLSX.utils.book_append_sheet(wb, ws, '티밍 결과');
+
+            // 파일명 생성 (날짜 포함)
+            const today = new Date();
+            const dateString = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+            const fileName = `SSGG_티밍결과_${dateString}.xlsx`;
+
+            // 파일 다운로드
+            XLSX.writeFile(wb, fileName);
         }
 
         // 페이지 로드시 멤버 테이블 렌더링
