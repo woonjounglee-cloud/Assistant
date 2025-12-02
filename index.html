@@ -600,10 +600,12 @@
                 // 닉네임
                 const nicknameCell = row.insertCell();
                 nicknameCell.textContent = member.nickname;
+                nicknameCell.style.fontSize = '11px';
 
                 // 이름
                 const nameCell = row.insertCell();
                 nameCell.textContent = member.name;
+                nameCell.style.fontSize = '11px';
 
                 // 3월~10월 타수 입력 (8개월)
                 for (let i = 0; i < 8; i++) {
