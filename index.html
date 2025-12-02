@@ -525,21 +525,21 @@
 
         // 초기 멤버 데이터
         const initialMembers = [
-            { nickname: '네일은', name: '김미영(A)', scores: [94, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '보너디', name: '이소연', scores: [100, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '라벨가조아', name: '신수진', scores: [90, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '마리짱', name: '이지영', scores: [90, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '땅땅왕', name: '강진혜', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '비비', name: '하나티', scores: [102, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '세이쿠', name: '최선미', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '언젠간잘할', name: '구현영', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '연례행사터', name: '김미영(B)', scores: [103, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '운지리', name: '이문정', scores: [103, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '정', name: '신애정', scores: [86, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '제이', name: '고윤희', scores: [98, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '제제', name: '최지혜', scores: [108, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '케이티', name: '조정희', scores: [120, 0, 0, 0, 0, 0, 0, 0], attend: false },
-            { nickname: '퍼시픽', name: '문선희', scores: [94, 0, 0, 0, 0, 0, 0, 0], attend: false }
+            { nickname: '네일은', name: '김미영(A)', scores: [94, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '보너디', name: '이소연', scores: [100, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '라벨가조아', name: '신수진', scores: [90, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '마리짱', name: '이지영', scores: [90, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '땅땅왕', name: '강진혜', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '비비', name: '하나티', scores: [102, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '세이쿠', name: '최선미', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '언젠간잘할', name: '구현영', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '연례행사터', name: '김미영(B)', scores: [103, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '운지리', name: '이문정', scores: [103, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '정', name: '신애정', scores: [86, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '제이', name: '고윤희', scores: [98, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '제제', name: '최지혜', scores: [108, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '케이티', name: '조정희', scores: [120, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '퍼시픽', name: '문선희', scores: [94, 0, 0, 0, 0, 0, 0, 0], attend: true }
         ];
 
         // 멤버 데이터 로드
@@ -613,6 +613,7 @@
                     input.style.width = '45px';
                     input.style.padding = '4px';
                     input.style.textAlign = 'center';
+                    input.style.fontSize = '10px';
                     input.oninput = () => updateAverage(row);
                     scoreCell.appendChild(input);
                 }
@@ -668,7 +669,7 @@
                 nickname,
                 name,
                 scores: [score, 0, 0, 0, 0, 0, 0, 0],
-                attend: false
+                attend: true
             });
 
             localStorage.setItem('ssggMembers', JSON.stringify(members));
