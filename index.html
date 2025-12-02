@@ -395,6 +395,7 @@
             <div style="margin-bottom: 20px; text-align: right;">
                 <button class="btn btn-success" onclick="makeTeams()">🎯 티밍 짜기</button>
                 <button class="btn btn-export" onclick="saveMemberData()">💾 저장</button>
+                <button class="btn btn-export" onclick="resetToInitialData()" style="background: #dc3545;">🔄 초기화</button>
             </div>
 
             <div class="table-container" style="max-height: 600px;">
@@ -531,7 +532,7 @@
             { nickname: '마리짱', name: '이지영', scores: [90, 0, 0, 0, 0, 0, 0, 0], attend: true },
             { nickname: '방랑몽', name: '강영애', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: true },
             { nickname: '비비', name: '하나리', scores: [102, 0, 0, 0, 0, 0, 0, 0], attend: true },
-            { nickname: '세이지', name: '최선미', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '세이쥐', name: '최선미', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: true },
             { nickname: '언젠간싱글', name: '구현영', scores: [95, 0, 0, 0, 0, 0, 0, 0], attend: true },
             { nickname: '연례행사녀', name: '김미영(B)', scores: [103, 0, 0, 0, 0, 0, 0, 0], attend: true },
             { nickname: '운치리', name: '이운정', scores: [103, 0, 0, 0, 0, 0, 0, 0], attend: true },
@@ -539,7 +540,8 @@
             { nickname: '제이', name: '고준희', scores: [98, 0, 0, 0, 0, 0, 0, 0], attend: true },
             { nickname: '졔졔', name: '최지혜', scores: [108, 0, 0, 0, 0, 0, 0, 0], attend: true },
             { nickname: '케이티', name: '조성희', scores: [120, 0, 0, 0, 0, 0, 0, 0], attend: true },
-            { nickname: '퍼시픽', name: '문선희', scores: [94, 0, 0, 0, 0, 0, 0, 0], attend: true }
+            { nickname: '퍼시픽', name: '문선희', scores: [94, 0, 0, 0, 0, 0, 0, 0], attend: true },
+            { nickname: '표표네', name: '나은지', scores: [98, 0, 0, 0, 0, 0, 0, 0], attend: true }
         ];
 
         // 멤버 데이터 로드
@@ -690,6 +692,15 @@
             members.splice(index, 1);
             localStorage.setItem('ssggMembers', JSON.stringify(members));
             renderMemberTable();
+        }
+
+        // 초기 데이터로 리셋
+        function resetToInitialData() {
+            if (!confirm('모든 데이터를 초기 상태로 되돌립니다. 계속하시겠습니까?')) return;
+
+            localStorage.setItem('ssggMembers', JSON.stringify(initialMembers));
+            renderMemberTable();
+            alert('초기 데이터로 리셋되었습니다!');
         }
 
         // 티밍 짜기
