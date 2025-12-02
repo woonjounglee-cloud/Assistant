@@ -744,8 +744,60 @@
                 }
             }
 
+            // 김미영(A)와 김미영(B)가 같은 팀에 있는지 확인하고 조정
+            adjustTeamsForSameNameMembers(teams);
+
             // 결과 표시
             displayTeamResult(teams);
+        }
+
+        // 같은 이름의 멤버가 같은 팀에 있는지 확인하고 조정
+        function adjustTeamsForSameNameMembers(teams) {
+            const targetNames = ['김미영(A)', '김미영(B)'];
+
+            // 각 팀에서 김미영(A)와 김미영(B)가 모두 있는지 확인
+            for (let i = 0; i < teams.length; i++) {
+                const team = teams[i];
+                const kimAIndex = team.findIndex(m => m.name === targetNames[0]);
+                const kimBIndex = team.findIndex(m => m.name === targetNames[1]);
+
+                // 같은 팀에 둘 다 있는 경우
+                if (kimAIndex !== -1 && kimBIndex !== -1) {
+                    // 김미영(B)를 다른 팀으로 이동 (B를 이동시킴)
+                    const memberToMove = team[kimBIndex];
+
+                    // 다른 팀 중에서 김미영(A)가 없는 팀을 찾아 스왑
+                    for (let j = 0; j < teams.length; j++) {
+                        if (i === j) continue; // 같은 팀은 스킵
+
+                        const otherTeam = teams[j];
+                        const hasKimA = otherTeam.some(m => m.name === targetNames[0]);
+
+                        // 김미영(A)가 없는 팀과 스왑
+                        if (!hasKimA) {
+                            // 평균 타수가 비슷한 멤버를 찾아 스왑
+                            let bestSwapIndex = 0;
+                            let minDiff = Math.abs(memberToMove.avg - otherTeam[0].avg);
+
+                            for (let k = 1; k < otherTeam.length; k++) {
+                                const diff = Math.abs(memberToMove.avg - otherTeam[k].avg);
+                                if (diff < minDiff) {
+                                    minDiff = diff;
+                                    bestSwapIndex = k;
+                                }
+                            }
+
+                            // 스왑 수행
+                            const temp = otherTeam[bestSwapIndex];
+                            otherTeam[bestSwapIndex] = memberToMove;
+                            team[kimBIndex] = temp;
+
+                            break; // 스왑 완료 후 다음 팀으로
+                        }
+                    }
+                    break; // 문제가 해결되었으므로 루프 종료
+                }
+            }
         }
 
         // 티밍 결과 표시
